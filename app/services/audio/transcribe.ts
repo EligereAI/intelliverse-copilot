@@ -1,5 +1,3 @@
-// Transcribe audio via Gemini — flly independent of Azure
-
 export async function transcribeAudio(
   blob: Blob,
   durationSecs: number,

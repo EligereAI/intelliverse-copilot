@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import ConnectionStatus from "./connection-status";
 
 interface ChatFrameProps {
   children: React.ReactNode;
@@ -9,7 +10,6 @@ interface ChatFrameProps {
 export default function ChatFrame({ children }: ChatFrameProps) {
   return (
     <div className="flex flex-col items-center w-full">
-
       {/* Gradient border wrapper */}
       <div
         style={{
@@ -39,7 +39,6 @@ export default function ChatFrame({ children }: ChatFrameProps) {
             background: "#fafaf9",
           }}
         >
-
           {/* ── Nova Header ── */}
           <div
             style={{
@@ -51,24 +50,20 @@ export default function ChatFrame({ children }: ChatFrameProps) {
               gap: 12,
               background: "#ffffff",
               borderBottom: "1px solid #ece9e4",
-              /* Subtle inner glow on top edge */
               boxShadow: "inset 0 1px 0 rgba(255,255,255,1), 0 1px 0 #ece9e4",
             }}
           >
-            {/* Avatar with ring */}
-            <div style={{
-              position: "relative",
-              flexShrink: 0,
-              width: 46,
-              height: 46,
-            }}>
-              <div style={{
-                position: "absolute",
-                inset: -1,
-                borderRadius: "50%",
-                background: "#ffffff",
-                zIndex: 1,
-              }} />
+            {/* Avatar */}
+            <div style={{ position: "relative", flexShrink: 0, width: 46, height: 46 }}>
+              <div
+                style={{
+                  position: "absolute",
+                  inset: -1,
+                  borderRadius: "50%",
+                  background: "#ffffff",
+                  zIndex: 1,
+                }}
+              />
               <Image
                 src="/nova-icon.svg"
                 alt="Nova"
@@ -81,66 +76,32 @@ export default function ChatFrame({ children }: ChatFrameProps) {
                   display: "block",
                 }}
               />
-              {/* Live dot */}
-              {/* <span style={{
-                position: "absolute",
-                bottom: 1,
-                right: 1,
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                background: "#22c55e",
-                border: "2px solid #ffffff",
-                zIndex: 3,
-              }} /> */}
             </div>
 
             {/* Name + Role */}
             <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <span style={{
-                fontSize: 18,
-                fontWeight: 600,
-                color: "#1a1916",
-                lineHeight: 1,
-                letterSpacing: "-0.01em",
-              }}>
+              <span
+                style={{
+                  fontSize: 18,
+                  fontWeight: 600,
+                  color: "#1a1916",
+                  lineHeight: 1,
+                  letterSpacing: "-0.01em",
+                }}
+              >
                 Nova
               </span>
-              {/* <span style={{
-                fontSize: 12,
-                color: "#22c55e",
-                fontWeight: 500,
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-              }}>
-                <span style={{
-                  width: 5,
-                  height: 5,
-                  borderRadius: "50%",
-                  background: "#22c55e",
-                  display: "inline-block",
-                  boxShadow: "0 0 0 2px rgba(34,197,94,0.2)",
-                }} />
-                Online
-              </span> */}
             </div>
 
             {/* Divider */}
-            <div style={{
-              width: 1,
-              height: 28,
-              background: "#ece9e4",
-              // marginLeft: 1,
-            }} />
+            <div style={{ width: 1, height: 28, background: "#ece9e4" }} />
 
-            <span style={{
-              fontSize: 14,
-              color: "#a09b94",
-              fontWeight: 400,
-            }}>
+            <span style={{ fontSize: 14, color: "#a09b94", fontWeight: 400 }}>
               Sales Copilot
             </span>
+
+            {/* ── Status indicators — pushed to the right ── */}
+            <ConnectionStatus />
           </div>
 
           {/* ── Chat Body ── */}
@@ -150,7 +111,6 @@ export default function ChatFrame({ children }: ChatFrameProps) {
           >
             {children}
           </div>
-
         </div>
       </div>
     </div>
