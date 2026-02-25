@@ -1,20 +1,20 @@
-// ── Modality ───────────────────────────────────────────────────────────────────
+//  Modality 
 export interface ModalityConfig {
-  label: string | Record<string, string>;   // can be a plain string OR a lang-keyed map
+  label: string | Record<string, string>; 
   description?: string;
   chainOfThoughtActive?: boolean;
 }
 
-// ── Bot (per modality) ─────────────────────────────────────────────────────────
+//  Bot (per modality) 
 export interface BotConfig {
   bot_welcome_message: Record<string, string[]>;  // { en: [...] }
   voiceInputLanguages?: string[];
   productImages?: boolean;
   definedTags?: string[];
-  [key: string]: unknown;                         // allow extra fields
+  [key: string]: unknown;
 }
 
-// ── CSS / branding ─────────────────────────────────────────────────────────────
+//  CSS / branding 
 export interface CompanyCss {
   logo?: string;
   botName: string;
@@ -31,10 +31,10 @@ export interface CompanyCss {
   userMessage?: { color?: string; bg?: string };
 }
 
-// ── Support URLs (per modality + lang) ────────────────────────────────────────
+//  Support URLs (per modality + lang) 
 export type SupportUrl = Record<string, Record<string, string>>;
 
-// ── Company ────────────────────────────────────────────────────────────────────
+//  Company 
 export interface Company {
   id: string;
   name: string;
@@ -81,7 +81,7 @@ export interface Company {
   supportUrl?: SupportUrl;
 }
 
-// ── Resolved modality (mirrors server's defineModality output) ─────────────────
+// Resolved modality 
 export interface ResolvedModality {
   key: string;                          // e.g. "technical"
   displayLabel: string;                 // resolved for current lang

@@ -178,7 +178,13 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
       >
         <div
           className="w-full flex flex-col overflow-hidden animate-frame-in"
-          style={{ height: "100%", borderRadius: 22, background: "#fafaf9" }}
+          style={{
+            height: "100%",
+            borderRadius: 22,
+            background: "rgba(250, 250, 249, 0.78)",
+            backdropFilter: "blur(18px)",
+            WebkitBackdropFilter: "blur(18px)",
+          }}
         >
           {/* ── Header ── */}
           <div
@@ -189,7 +195,9 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
               alignItems: "center",
               padding: "0 20px",
               gap: 10,
-              background: "#ffffff",
+              background: "rgba(255, 255, 255, 0.72)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
               borderBottom: "1px solid #ece9e4",
             }}
           >
@@ -273,7 +281,7 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
           {/* ── Body ── */}
           <div
             className="flex-1 min-h-0 flex flex-col"
-            style={{ background: "#fafaf9" }}
+            style={{ background: "rgba(250, 250, 249, 0.72)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
           >
             {children}
           </div>
