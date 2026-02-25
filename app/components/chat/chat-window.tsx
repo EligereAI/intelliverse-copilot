@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-
 import ChatInput from "./chat-input";
 import ChatMessage from "./chat-message";
+import ModalityPicker from "./modality-picker";
 import { useChatContext } from "@/app/providers/chat-provider";
 
 // ── Session gate overlays ──────────────────────────────────────────────────────
@@ -28,13 +28,7 @@ function SessionCreating() {
   );
 }
 
-function SessionError({
-  error,
-  onRetry,
-}: {
-  error: string | null;
-  onRetry: () => void;
-}) {
+function SessionError({ error, onRetry }: { error: string | null; onRetry: () => void }) {
   return (
     <div
       style={{
@@ -63,26 +57,11 @@ function SessionError({
         ⚡
       </div>
       <div>
-        <p
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: "#1a1916",
-            margin: 0,
-            marginBottom: 4,
-          }}
-        >
+        <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1916", margin: 0, marginBottom: 4 }}>
           Couldn&apos;t start session
         </p>
         {error && (
-          <p
-            style={{
-              fontSize: 12,
-              color: "#a09b94",
-              margin: 0,
-              fontFamily: "monospace",
-            }}
-          >
+          <p style={{ fontSize: 12, color: "#a09b94", margin: 0, fontFamily: "monospace" }}>
             {error}
           </p>
         )}
@@ -139,9 +118,7 @@ function SessionExpired({ onReset }: { onReset: () => void }) {
         🕐
       </div>
       <div>
-        <p
-          style={{ fontSize: 14, fontWeight: 600, color: "#1a1916", margin: 0, marginBottom: 4 }}
-        >
+        <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1916", margin: 0, marginBottom: 4 }}>
           Session expired
         </p>
         <p style={{ fontSize: 12, color: "#a09b94", margin: 0 }}>
@@ -180,14 +157,7 @@ function TypingIndicator() {
           40%          { transform: translateY(-5px); opacity:1; }
         }
       `}</style>
-      <div
-        style={{
-          display: "flex",
-          gap: 4,
-          padding: "12px 16px",
-          alignSelf: "flex-start",
-        }}
-      >
+      <div style={{ display: "flex", gap: 4, padding: "12px 16px", alignSelf: "flex-start" }}>
         {[0, 1, 2].map((i) => (
           <span
             key={i}
@@ -207,7 +177,8 @@ function TypingIndicator() {
 }
 
 // ── Empty state ────────────────────────────────────────────────────────────────
-function EmptyState() {
+function EmptyState({ welcomeMessages }: { welcomeMessages: string[] }) {
+  if (welcomeMessages.length > 0) return null; // welcome messages shown separately
   return (
     <div
       style={{
@@ -230,12 +201,57 @@ function EmptyState() {
   );
 }
 
+// ── Welcome message bubbles ────────────────────────────────────────────────────
+function WelcomeBubbles({ messages }: { messages: string[] }) {
+  if (messages.length === 0) return null;
+  return (
+    <>
+      <style>{`
+        @keyframes welcomeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+      {messages.map((msg, i) => (
+        <div
+          key={i}
+          style={{
+            display: "flex",
+            justifyContent: "flex-start",
+            padding: "3px 0",
+            animation: `welcomeIn 0.28s ease ${i * 0.1}s both`,
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "72%",
+              padding: "11px 15px",
+              borderRadius: "16px 16px 16px 4px",
+              background: "#ffffff",
+              color: "#1a1916",
+              fontSize: 14,
+              lineHeight: 1.6,
+              fontWeight: 400,
+              boxShadow: "0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05)",
+              wordBreak: "break-word",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {msg}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function ChatWindow() {
   const {
     messages,
     isWaiting,
     sendMessage,
+    selectedModality,
     sessionStatus,
     sessionError,
     retrySession,
@@ -250,7 +266,16 @@ export default function ChatWindow() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isWaiting]);
 
-  // ── Session gate ───────────────────────────────────────────────────────────
+  // ── Gate 1: No modality selected → show picker ─────────────────────────────
+  if (!selectedModality) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+        <ModalityPicker />
+      </div>
+    );
+  }
+
+  // ── Gate 2: Session still creating ────────────────────────────────────────
   if (sessionStatus === "creating" || sessionStatus === "idle") {
     return (
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -277,6 +302,10 @@ export default function ChatWindow() {
 
   // ── Active session ─────────────────────────────────────────────────────────
   const canSend = socketStatus === "connected" && !isWaiting;
+  const welcomeMessages =
+    selectedModality.bot_welcome_message?.en ??
+    selectedModality.bot_welcome_message?.["en"] ??
+    [];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -294,16 +323,16 @@ export default function ChatWindow() {
           scrollbarColor: "#ddd9d3 transparent",
         }}
       >
+        {/* Welcome messages always shown at top */}
+        <WelcomeBubbles messages={welcomeMessages} />
+
         {messages.length === 0 && !isWaiting ? (
-          <EmptyState />
+          <EmptyState welcomeMessages={welcomeMessages} />
         ) : (
           messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)
         )}
 
-        {/* Typing indicator — show when waiting but no streaming message exists yet */}
-        {isWaiting && !messages.some((m) => m.isStreaming) && (
-          <TypingIndicator />
-        )}
+        {isWaiting && !messages.some((m) => m.isStreaming) && <TypingIndicator />}
 
         <div ref={bottomRef} />
       </div>
@@ -326,9 +355,7 @@ export default function ChatWindow() {
 function SpinnerRing() {
   return (
     <>
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div
         style={{
           width: 36,

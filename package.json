@@ -12,6 +12,7 @@
     "@azure/storage-blob": "^12.31.0",
     "@google/generative-ai": "^0.24.1",
     "express": "^5.2.1",
+    "mongodb": "^7.1.0",
     "multer": "^2.0.2",
     "next": "16.1.6",
     "react": "19.2.3",

@@ -5,15 +5,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const RAW_WS = (
   process.env.NEXT_PUBLIC_WS_URL ?? "wss://devsockets.elisa.live"
 ).replace(/\/$/, "");
-const COMPANY_ID = process.env.NEXT_PUBLIC_COMPANY_ID ?? "";
+const COMPANY_ID = (process.env.NEXT_PUBLIC_COMPANY_ID ?? "").trim();
 const USER_ID = 1234;
 const END_TOKEN = "END_OF_RESPONSE_TOKEN";
 
-export type SocketStatus =
-  | "disconnected"
-  | "connecting"
-  | "connected"
-  | "error";
+export type SocketStatus = "disconnected" | "connecting" | "connected" | "error";
 
 export interface ChatMessage {
   id: string;
@@ -54,9 +50,11 @@ export function useChat({
   const stoppedRidsRef = useRef<Set<string>>(new Set());
   const bufferRef = useRef<string>("");
 
+  const flowTypeRef = useRef<string | null>(flowType);
+  flowTypeRef.current = flowType;
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [socketStatus, setSocketStatus] =
-    useState<SocketStatus>("disconnected");
+  const [socketStatus, setSocketStatus] = useState<SocketStatus>("disconnected");
   const [isWaiting, setIsWaiting] = useState(false);
 
   const connect = useCallback(() => {
@@ -67,11 +65,10 @@ export function useChat({
     )
       return;
 
-    // Match reference: wss://devsockets.elisa.live?userId=1234
     const url = RAW_WS + USER_ID;
     console.log("[useChat] Connecting:", url);
-
     setSocketStatus("connecting");
+
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
@@ -112,9 +109,7 @@ export function useChat({
       if (rid && stoppedRidsRef.current.has(rid)) return;
       if (rid && currentRidRef.current && rid !== currentRidRef.current) return;
 
-      const response = data.response as
-        | { text: string; passing: boolean }
-        | undefined;
+      const response = data.response as { text: string; passing: boolean } | undefined;
       if (!response) return;
 
       if (response.text === "stream-end") {
@@ -129,8 +124,7 @@ export function useChat({
 
       if (response.passing && typeof response.text === "string") {
         const endIdx = response.text.indexOf(END_TOKEN);
-        const safeChunk =
-          endIdx >= 0 ? response.text.slice(0, endIdx) : response.text;
+        const safeChunk = endIdx >= 0 ? response.text.slice(0, endIdx) : response.text;
         if (!safeChunk) return;
 
         bufferRef.current += safeChunk;
@@ -139,9 +133,7 @@ export function useChat({
         setMessages((prev) => {
           const hasStreaming = prev.some((m) => m.isStreaming);
           if (hasStreaming)
-            return prev.map((m) =>
-              m.isStreaming ? { ...m, text: accumulated } : m,
-            );
+            return prev.map((m) => (m.isStreaming ? { ...m, text: accumulated } : m));
           if (rid) currentRidRef.current = rid;
           return [
             ...prev,
@@ -156,7 +148,7 @@ export function useChat({
         });
       }
     };
-  }, []); // eslint-disable-line
+  }, []);  
 
   const disconnect = useCallback(() => {
     if (reconnTimerRef.current) clearTimeout(reconnTimerRef.current);
@@ -178,13 +170,7 @@ export function useChat({
 
       setMessages((prev) => [
         ...prev,
-        {
-          id: genId(),
-          sender: "user",
-          text,
-          isStreaming: false,
-          timestamp: new Date(),
-        },
+        { id: genId(), sender: "user", text, isStreaming: false, timestamp: new Date() },
       ]);
       setIsWaiting(true);
       bufferRef.current = "";
@@ -196,7 +182,7 @@ export function useChat({
         sessionId,
         isDetail: false,
         regenerate: false,
-        flow_type: "technical",
+        flow_type: flowTypeRef.current,
         language_code: languageCode,
       };
       if (additionalInfo && Object.keys(additionalInfo).length > 0)
