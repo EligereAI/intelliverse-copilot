@@ -5,6 +5,7 @@ import {
   fetchCompany,
   resolveModalities,
   getIntroMessages,
+  getSupportFlags,
 } from "@/app/services/company/companyService";
 import type { Company, ResolvedModality } from "@/app/types/company";
 
@@ -16,6 +17,8 @@ export interface UseCompanyReturn {
   introMessages: string[];
   status: CompanyStatus;
   error: string | null;
+  collectFeedback: boolean;
+  requiredSupportButton: boolean;
   retry: () => void;
 }
 
@@ -28,9 +31,10 @@ export function useCompany(
   const [introMessages, setIntroMessages] = useState<string[]>([]);
   const [status, setStatus] = useState<CompanyStatus>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [collectFeedback, setCollectFeedback] = useState(false);
+  const [requiredSupportButton, setRequiredSupportButton] = useState(false);
 
   const load = useCallback(async () => {
-    // Trim to guarantee no accidental whitespace from env var
     const id = companyId.trim();
 
     if (!id) {
@@ -47,6 +51,12 @@ export function useCompany(
       setCompany(data);
       setModalities(resolveModalities(data, lang));
       setIntroMessages(getIntroMessages(data, lang));
+
+      const flags = getSupportFlags(data);
+
+      setCollectFeedback(flags.collectFeedback);
+      setRequiredSupportButton(flags.requiredSupportButton);
+
       setStatus("ready");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load company");
@@ -58,5 +68,14 @@ export function useCompany(
     load();
   }, [load]);
 
-  return { company, modalities, introMessages, status, error, retry: load };
+  return {
+    company,
+    modalities,
+    introMessages,
+    status,
+    error,
+    collectFeedback,
+    requiredSupportButton,
+    retry: load,
+  };
 }

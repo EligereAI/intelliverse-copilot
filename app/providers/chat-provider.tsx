@@ -30,6 +30,10 @@ interface ChatContextValue {
   sendMessage: (text: string) => void;
   sendFeedback: (payload: FeedbackPayload) => void;
   clearMessages: () => void;
+
+  // Feature flags
+  collectFeedback: boolean;
+  requiredSupportButton: boolean;
 }
 
 const ChatContext = createContext<ChatContextValue | null>(null);
@@ -49,6 +53,8 @@ export function ChatProvider({
     status: companyStatus,
     error: companyError,
     retry: retryCompany,
+    collectFeedback,
+    requiredSupportButton,
   } = useCompany(COMPANY_ID, languageCode);
 
   const {
@@ -64,7 +70,6 @@ export function ChatProvider({
     autoStart: false,
   });
 
-  // Destructure sendFeedback from useChat so feedback can be passed down
   const { messages, socketStatus, isWaiting, sendMessage, sendFeedback, clearMessages } =
     useChat({
       sessionId,
@@ -107,6 +112,8 @@ export function ChatProvider({
         sendMessage,
         sendFeedback,
         clearMessages,
+        collectFeedback,
+        requiredSupportButton,
       }}
     >
       {children}

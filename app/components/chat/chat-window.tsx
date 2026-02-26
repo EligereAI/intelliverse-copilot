@@ -86,6 +86,8 @@ export default function ChatWindow() {
     messages, isWaiting, sendMessage, sendFeedback,
     selectedModality, sessionStatus, sessionError,
     retrySession, resetSession, socketStatus,
+    // ── feature flags ──
+    collectFeedback, requiredSupportButton,
   } = useChatContext();
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -192,6 +194,8 @@ export default function ChatWindow() {
               onFeedback={sendFeedback}
               onContactSupport={() => setShowContact(true)}
               onHeightChange={() => { if (!userScrolledUp.current) scrollToBottom(false); }}
+              collectFeedback={collectFeedback}
+              requiredSupportButton={requiredSupportButton}
             />
           ))}
 

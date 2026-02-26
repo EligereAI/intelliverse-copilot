@@ -2,13 +2,10 @@ import type { Company, ResolvedModality, BotConfig, ModalityConfig } from "@/app
 
 // Fetch company config from our Next.js API route
 export async function fetchCompany(companyId: string): Promise<Company> {
-  // Always trim — guards against env var whitespace/newline
   const id = companyId.trim();
-
   const url = `/api/company?companyId=${encodeURIComponent(id)}`;
 
   const res = await fetch(url, {
-    // Next.js fetch cache: revalidate every 5 min
     next: { revalidate: 300 },
   });
 
@@ -53,13 +50,13 @@ export function resolveModalities(
     definedTags: botData.definedTags ?? [],
   });
 
-  // Case 1: Both modality map and bots map exist (Pix4D / Ford shape)
+  // Case 1: Both modality map and bots map exist
   if (
     modality && typeof modality === "object" && Object.keys(modality).length > 0 &&
     bots   && typeof bots   === "object" && Object.keys(bots).length   > 0
   ) {
     return Object.keys(modality)
-      .filter((k) => bots[k])                          // skip keys with no bot
+      .filter((k) => bots[k])
       .map((k) => makeResolved(k, bots[k], modality[k]));
   }
 
@@ -94,4 +91,19 @@ export function getIntroMessages(company: Company, lang = "en"): string[] {
   const intro = company.bot_intro_message;
   if (!intro) return [];
   return intro[lang] ?? intro["en"] ?? [];
+}
+
+export interface SupportFlags {
+  collectFeedback: boolean;
+  requiredSupportButton: boolean;
+}
+
+export function getSupportFlags(company: Company): SupportFlags {
+  const collectFeedback = Boolean(
+    company.collectFeedback ?? company.support?.collectFeedback ?? false,
+  );
+
+  const requiredSupportButton = Boolean(company.requiredSupportButton ?? false);
+
+  return { collectFeedback, requiredSupportButton };
 }

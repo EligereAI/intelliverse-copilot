@@ -56,6 +56,7 @@ export interface Company {
     privacyPolicyEnabled?: boolean;
     privacyPolicy?: string | Record<string, string>;
     disclaimer?: string | Record<string, string>;
+    collectFeedback?: boolean;
   };
 
   bot_intro_message?: Record<string, string[]>;
@@ -68,6 +69,7 @@ export interface Company {
   mathJaxEnabled?: boolean;
   markedJsEnabled?: boolean;
   collectFeedback?: boolean;
+  requiredSupportButton?: boolean;
   persistSession?: boolean;
   enablePopout?: boolean;
   popOutMessage?: string;

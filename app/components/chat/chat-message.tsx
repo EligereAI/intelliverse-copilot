@@ -178,80 +178,90 @@ function FeedbackRow({
   vote,
   onVote,
   onContactSupport,
+  collectFeedback,
+  requiredSupportButton,
 }: {
   vote: VoteState;
   onVote: (liked: boolean) => void;
   onContactSupport: () => void;
+  collectFeedback: boolean;
+  requiredSupportButton: boolean;
 }) {
+  // If neither feature is enabled, render nothing
+  if (!collectFeedback && !requiredSupportButton) return null;
+
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:7 }}>
-      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-        {/* Label — only before voting */}
-        {vote === "idle" && (
-          <span style={{ fontSize:13, color:"#6b6560" }}>Was this answer helpful?</span>
-        )}
+      {/* ── Thumbs row ── only when collectFeedback is true */}
+      {collectFeedback && (
+        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+          {/* Label — only before voting */}
+          {vote === "idle" && (
+            <span style={{ fontSize:13, color:"#6b6560" }}>Was this answer helpful?</span>
+          )}
 
-        {/* Like button — always shown unless disliked */}
-        {vote !== "disliked" && (
-          <div className={vote === "liked" ? "vote-tooltip-wrap" : undefined}>
-            {vote === "liked" && (
-              <span className="vote-tooltip">You liked this response</span>
-            )}
-            <button
-              onClick={() => onVote(true)}
-              disabled={vote !== "idle"}
-              title="Helpful"
-              style={{
-                width:32, height:32, borderRadius:8,
-                border: vote === "liked" ? "1.5px solid #c4103a" : "1px solid #e8e2da",
-                background: vote === "liked" ? "#fdf0f3" : "#fff",
-                cursor: vote === "idle" ? "pointer" : "default",
-                display:"flex", alignItems:"center", justifyContent:"center",
-                transition:"all .15s", flexShrink:0,
-              }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24"
-                fill={vote === "liked" ? "#c4103a" : "none"}
-                stroke={vote === "liked" ? "#c4103a" : "#6b6560"}
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
-              </svg>
-            </button>
-          </div>
-        )}
+          {/* Like button — always shown unless disliked */}
+          {vote !== "disliked" && (
+            <div className={vote === "liked" ? "vote-tooltip-wrap" : undefined}>
+              {vote === "liked" && (
+                <span className="vote-tooltip">You liked this response</span>
+              )}
+              <button
+                onClick={() => onVote(true)}
+                disabled={vote !== "idle"}
+                title="Helpful"
+                style={{
+                  width:32, height:32, borderRadius:8,
+                  border: vote === "liked" ? "1.5px solid #c4103a" : "1px solid #e8e2da",
+                  background: vote === "liked" ? "#fdf0f3" : "#fff",
+                  cursor: vote === "idle" ? "pointer" : "default",
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  transition:"all .15s", flexShrink:0,
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24"
+                  fill={vote === "liked" ? "#c4103a" : "none"}
+                  stroke={vote === "liked" ? "#c4103a" : "#6b6560"}
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                </svg>
+              </button>
+            </div>
+          )}
 
-        {/* Dislike button — always shown unless liked */}
-        {vote !== "liked" && (
-          <div className={vote === "disliked" ? "vote-tooltip-wrap" : undefined}>
-            {vote === "disliked" && (
-              <span className="vote-tooltip">You disliked this response</span>
-            )}
-            <button
-              onClick={() => onVote(false)}
-              disabled={vote !== "idle"}
-              title="Not helpful"
-              style={{
-                width:32, height:32, borderRadius:8,
-                border: vote === "disliked" ? "1.5px solid #c4103a" : "1px solid #e8e2da",
-                background: vote === "disliked" ? "#fdf0f3" : "#fff",
-                cursor: vote === "idle" ? "pointer" : "default",
-                display:"flex", alignItems:"center", justifyContent:"center",
-                transition:"all .15s", flexShrink:0,
-              }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24"
-                fill={vote === "disliked" ? "#c4103a" : "none"}
-                stroke={vote === "disliked" ? "#c4103a" : "#6b6560"}
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
-              </svg>
-            </button>
-          </div>
-        )}
-      </div>
+          {/* Dislike button — always shown unless liked */}
+          {vote !== "liked" && (
+            <div className={vote === "disliked" ? "vote-tooltip-wrap" : undefined}>
+              {vote === "disliked" && (
+                <span className="vote-tooltip">You disliked this response</span>
+              )}
+              <button
+                onClick={() => onVote(false)}
+                disabled={vote !== "idle"}
+                title="Not helpful"
+                style={{
+                  width:32, height:32, borderRadius:8,
+                  border: vote === "disliked" ? "1.5px solid #c4103a" : "1px solid #e8e2da",
+                  background: vote === "disliked" ? "#fdf0f3" : "#fff",
+                  cursor: vote === "idle" ? "pointer" : "default",
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  transition:"all .15s", flexShrink:0,
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24"
+                  fill={vote === "disliked" ? "#c4103a" : "none"}
+                  stroke={vote === "disliked" ? "#c4103a" : "#6b6560"}
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Create support ticket — only before voting */}
-      {vote === "idle" && (
+      {/* ── Support ticket button ── only when requiredSupportButton is true AND before voting */}
+      {requiredSupportButton && vote === "idle" && (
         <button onClick={onContactSupport} style={{
           background:"none", border:"none", cursor:"pointer",
           display:"flex", alignItems:"center", gap:4,
@@ -302,12 +312,18 @@ interface Props {
   onPromptbackClick?: (question: string) => void;
   onFeedback?: (payload: FeedbackPayload) => void;
   onContactSupport?: () => void;
-  onHeightChange?: () => void; // fired when bubble grows — parent should scroll
+  onHeightChange?: () => void;
+  /** Gate the like/dislike thumbs — driven by company.collectFeedback */
+  collectFeedback?: boolean;
+  /** Gate the "Create support ticket" button — driven by company.requiredSupportButton */
+  requiredSupportButton?: boolean;
 }
 
 export default function ChatMessage({
   message, showAvatar, hasNewerMessage,
   onPromptbackClick, onFeedback, onContactSupport, onHeightChange,
+  collectFeedback = false,
+  requiredSupportButton = false,
 }: Props) {
   const isUser = message.sender === "user";
   const uniqueSources = dedupeByLink(message.sources);
@@ -343,7 +359,7 @@ export default function ChatMessage({
     setTimeout(() => {
       setAckLiked(liked);
       onHeightChange?.();
-    }, 620); // slightly after state settles
+    }, 620);
   }
 
   // suggestsDismissed controls slide-out of suggested questions only
@@ -352,6 +368,9 @@ export default function ChatMessage({
 
   const isDone = !isUser && !message.isStreaming && !message.isProcessingMeta;
   const rawPromptbacks = isDone ? (message.promptbackQuestions ?? []) : [];
+
+  // Decide whether the feedback row should be rendered at all
+  const showFeedbackRow = collectFeedback || requiredSupportButton;
 
   // Fire scroll when sources/promptbacks arrive (bubble grows taller)
   const prevHadSources = useRef(false);
@@ -372,7 +391,6 @@ export default function ChatMessage({
   }, [isDone, onHeightChange]);
 
   // Suppress avatar on main bubble when ack bubble is present
-  // (ack bubble is visually last in the cluster and owns the avatar)
   const mainBubbleShowAvatar = showAvatar && ackLiked === null;
 
   function handlePromptbackClick(q: string) {
@@ -469,15 +487,11 @@ export default function ChatMessage({
         </div>
       </div>
 
-      {/* Below-bubble extras:
-          - Feedback row is its own persistent block
-          - Suggestions are a separate block that can slide out
-          - Ack bubble is persistent once shown
-        */}
+      {/* Below-bubble extras */}
       {isDone && (
         <>
-          {/* Feedback row: visible when voted OR when not yet dismissed */}
-          {(voted || !suggestsDismissed) && (
+          {/* Feedback row: shown when at least one feature is enabled AND (voted OR not yet dismissed) */}
+          {showFeedbackRow && (voted || !suggestsDismissed) && (
             <div
               className="extras-in"
               style={{ display:"flex", flexDirection:"row", gap:8, padding:"5px 0 2px" }}
@@ -488,6 +502,8 @@ export default function ChatMessage({
                   vote={vote}
                   onVote={handleVote}
                   onContactSupport={() => onContactSupport?.()}
+                  collectFeedback={collectFeedback}
+                  requiredSupportButton={requiredSupportButton}
                 />
               </div>
             </div>
