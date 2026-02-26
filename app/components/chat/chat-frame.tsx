@@ -144,7 +144,8 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
 
   const botName = company?.css?.botName ?? "Nova";
 
-  // Derive subtitle from selected modality
+  // Single modality → "AI Sales Copilot" style label derived from the modality key
+  // Multi modality → show selected modality label or nothing until selected
   const subtitle = (() => {
     if (selectedModality) {
       if (modalities.length === 1) {
@@ -249,7 +250,7 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
                       lineHeight: 1,
                     }}
                   >
-                    {subtitle}
+                    Live Sales Assistant
                   </span>
                 </>
               )}
@@ -280,7 +281,11 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
           {/* ── Body ── */}
           <div
             className="flex-1 min-h-0 flex flex-col"
-            style={{ background: "rgba(250, 250, 249, 0.72)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+            style={{
+              background: "rgba(250, 250, 249, 0.72)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+            }}
           >
             {children}
           </div>

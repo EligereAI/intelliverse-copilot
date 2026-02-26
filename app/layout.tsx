@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Support Copilot | AI-Driven Support",
+  title: "Nova | Live Sales  Assistant",
   description: "AI-Driven Support for Modern Teams",
 };
 
