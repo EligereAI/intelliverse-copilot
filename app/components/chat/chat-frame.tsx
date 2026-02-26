@@ -36,7 +36,7 @@ function StatusDot({
         }
         .status-tip {
           position: absolute;
-          top: calc(100% + 8px);
+          top: calc(100% + 2px);
           right: 0;
           background: #1a1916;
           color: #fff;
@@ -47,13 +47,13 @@ function StatusDot({
           border-radius: 7px;
           white-space: nowrap;
           pointer-events: none;
-          z-index: 50;
+          z-index: 90;
           box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         .status-tip::before {
           content: "";
           position: absolute;
-          bottom: 100%; right: 9px;
+          bottom: 100%; right: 4px;
           border: 5px solid transparent;
           border-bottom-color: #1a1916;
         }

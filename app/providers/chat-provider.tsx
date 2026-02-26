@@ -1,15 +1,7 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,          // ⭐ NEW
-} from "react";
-
-import { useChat, ChatMessage, SocketStatus } from "../hooks/useChat";
+import React, { createContext, useContext, useState, useCallback } from "react";
+import { useChat, ChatMessage, SocketStatus, FeedbackPayload } from "../hooks/useChat";
 import { useSession, SessionStatus } from "../hooks/useSession";
 import { useCompany, CompanyStatus } from "../hooks/useCompany";
 import type { Company, ResolvedModality } from "../types/company";
@@ -33,10 +25,10 @@ interface ChatContextValue {
   resetSession: () => void;
 
   messages: ChatMessage[];
-  transcript: string;          // ⭐ NEW
   socketStatus: SocketStatus;
   isWaiting: boolean;
   sendMessage: (text: string) => void;
+  sendFeedback: (payload: FeedbackPayload) => void;
   clearMessages: () => void;
 }
 
@@ -49,8 +41,7 @@ export function ChatProvider({
   children: React.ReactNode;
   languageCode?: string;
 }) {
-  const [selectedModality, setSelectedModality] =
-    useState<ResolvedModality | null>(null);
+  const [selectedModality, setSelectedModality] = useState<ResolvedModality | null>(null);
 
   const {
     company,
@@ -73,28 +64,13 @@ export function ChatProvider({
     autoStart: false,
   });
 
-  const { messages, socketStatus, isWaiting, sendMessage, clearMessages } =
+  // ── ADDED: destructure sendFeedback from useChat ──
+  const { messages, socketStatus, isWaiting, sendMessage, sendFeedback, clearMessages } =
     useChat({
       sessionId,
       flowType: selectedModality?.key ?? null,
       languageCode,
     });
-
-  // ✅ Accumulated Transcript
-  const transcript = useMemo(() => {
-    return messages
-      .map((m) => `${m.role === "user" ? "User" : "Bot"}: ${m.content}`)
-      .join("\n");
-  }, [messages]);
-
-  // ✅ Console Log FULL Transcript Automatically
-  useEffect(() => {
-    if (!messages.length) return;
-
-    console.log("──────── CHAT TRANSCRIPT ────────");
-    console.log(transcript);
-    console.log("────────────────────────────────");
-  }, [transcript, messages.length]);
 
   const selectModality = useCallback(
     (modality: ResolvedModality) => {
@@ -126,10 +102,10 @@ export function ChatProvider({
         retrySession,
         resetSession,
         messages,
-        transcript,          // ⭐ NEW
         socketStatus,
         isWaiting,
         sendMessage,
+        sendFeedback,
         clearMessages,
       }}
     >
