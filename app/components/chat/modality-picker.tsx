@@ -125,6 +125,9 @@ function ModalityCard({ modality, onSelect, disabled, index }: {
   );
 }
 
+// TODO: Remove this hardcode once modality selection UX is finalised
+const HARDCODED_MODALITY = "sales";
+
 export default function ModalityPicker() {
   const {
     company,
@@ -137,135 +140,24 @@ export default function ModalityPicker() {
   } = useChatContext();
 
   useEffect(() => {
-    if (companyStatus === "ready" && modalities.length === 1) {
-      selectModality(modalities[0]);
-    }
+    if (companyStatus !== "ready" || modalities.length === 0) return;
+
+    // Hardcoded: always start with the sales modality if it exists
+    const target =
+      modalities.find((m) => m.key === HARDCODED_MODALITY) ?? modalities[0];
+    selectModality(target);
   }, [companyStatus, modalities, selectModality]);
 
   const isStarting = sessionStatus === "creating";
 
   if (companyStatus === "loading" || companyStatus === "idle") return <LoadingSkeleton />;
   if (companyStatus === "error") return <ErrorState error={companyError} onRetry={retryCompany} />;
-  if (modalities.length === 1) {
-    return (
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <SpinnerMini />
-      </div>
-    );
-  }
 
-  const botName   = company?.css?.botName ?? "Assistant";
-  const introMsgs = company?.bot_intro_message?.en ?? [];
-
+  // Always auto-selecting — show spinner while session spins up
   return (
-    <>
-      <style>{`
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(10px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-
-      <div style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "40px 32px",
-        gap: 0,
-      }}>
-
-        {/* Greeting block */}
-        <div style={{
-          textAlign: "center",
-          maxWidth: 400,
-          animation: "fadeUp 0.32s ease both",
-        }}>
-          {/* Bot name — muted label above the headline */}
-          <p style={{
-            margin: "0 0 10px",
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "#b5afa8",
-          }}>
-            {botName}
-          </p>
-
-          {/* Primary intro line */}
-          <h2 style={{
-            margin: "0 0 10px",
-            fontSize: 21,
-            fontWeight: 700,
-            color: "#1a1916",
-            letterSpacing: "-0.03em",
-            lineHeight: 1.25,
-          }}>
-            {introMsgs[0] ?? `Hello, I'm ${botName}`}
-          </h2>
-
-          {/* Remaining intro lines */}
-          {introMsgs.slice(1).map((msg, i) => (
-            <p key={i} style={{
-              margin: "0 0 3px",
-              fontSize: 13,
-              color: "#7a7470",
-              lineHeight: 1.65,
-              fontWeight: 400,
-              animation: `fadeUp 0.28s ease ${(i + 1) * 0.07 + 0.06}s both`,
-            }}>
-              {msg}
-            </p>
-          ))}
-        </div>
-
-        {/* Divider */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 14,
-          width: "100%",
-          maxWidth: 360,
-          margin: "28px 0 22px",
-          animation: "fadeUp 0.28s ease 0.2s both",
-        }}>
-          <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, transparent, #ddd9d3)" }} />
-          <span style={{
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: "0.10em",
-            textTransform: "uppercase",
-            color: "#c4bdb5",
-            whiteSpace: "nowrap",
-          }}>
-            What's on your mind?
-          </span>
-          <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, #ddd9d3, transparent)" }} />
-        </div>
-
-        {/* Modality cards */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center" }}>
-          {modalities.map((m, i) => (
-            <ModalityCard
-              key={m.key}
-              modality={m}
-              onSelect={() => selectModality(m)}
-              disabled={isStarting}
-              index={i}
-            />
-          ))}
-        </div>
-
-        {isStarting && (
-          <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 20, animation: "fadeUp 0.2s ease both" }}>
-            <SpinnerMini />
-            <span style={{ fontSize: 11, color: "#b5afa8", letterSpacing: "0.04em" }}>Starting session…</span>
-          </div>
-        )}
-      </div>
-    </>
+    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <SpinnerMini />
+    </div>
   );
 }
 
