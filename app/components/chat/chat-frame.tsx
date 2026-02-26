@@ -84,6 +84,66 @@ function StatusDot({
   );
 }
 
+/**
+ * A small dot badge that sits on the bottom-right corner of the avatar.
+ * Only rendered on small screens (via CSS). Shares the same colour/pulse
+ * logic as StatusDot but has no tooltip — it's purely a visual indicator.
+ */
+function AvatarStatusBadge({
+  socketStatus,
+  sessionStatus,
+}: {
+  socketStatus: SocketStatus;
+  sessionStatus: SessionStatus;
+}) {
+  const { color, pulse } = (() => {
+    if (socketStatus === "error" || sessionStatus === "error")
+      return { color: "#ef4444", pulse: false };
+    if (socketStatus === "disconnected" || sessionStatus === "idle")
+      return { color: "#94a3b8", pulse: false };
+    if (socketStatus === "connecting" || sessionStatus === "creating")
+      return { color: "#f59e0b", pulse: true };
+    if (sessionStatus === "expired")
+      return { color: "#f59e0b", pulse: false };
+    return { color: "#22c55e", pulse: true };
+  })();
+
+  return (
+    <>
+      <style>{`
+        @keyframes badgePulse {
+          0%,100% { box-shadow: 0 0 0 0 ${color}66; }
+          50%      { box-shadow: 0 0 0 3px ${color}00; }
+        }
+        /* Only visible on small screens */
+        .avatar-badge {
+          display: none;
+        }
+        @media (max-width: 480px) {
+          .avatar-badge {
+            display: block;
+          }
+        }
+      `}</style>
+      <div
+        className="avatar-badge"
+        style={{
+          position: "absolute",
+          bottom: 0,
+          right: 0,
+          width: 10,
+          height: 10,
+          borderRadius: "50%",
+          background: color,
+          border: "2px solid rgba(250,250,249,0.9)",
+          animation: pulse ? "badgePulse 2s ease-in-out infinite" : "none",
+          transition: "background 0.3s ease",
+        }}
+      />
+    </>
+  );
+}
+
 function NewChatButton({ onClick }: { onClick: () => void }) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -127,7 +187,8 @@ function NewChatButton({ onClick }: { onClick: () => void }) {
         <line x1="12" y1="5" x2="12" y2="19" />
         <line x1="5" y1="12" x2="19" y2="12" />
       </svg>
-      New chat
+      {/* Hide label on very small screens to save space */}
+      <span className="new-chat-label">New chat</span>
     </button>
   );
 }
@@ -144,8 +205,6 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
 
   const botName = company?.css?.botName ?? "Nova";
 
-  // Single modality → "AI Sales Copilot" style label derived from the modality key
-  // Multi modality → show selected modality label or nothing until selected
   const subtitle = (() => {
     if (selectedModality) {
       if (modalities.length === 1) {
@@ -157,13 +216,43 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
       }
       return selectedModality.displayLabel;
     }
-    // Not yet selected — if single modality, show generic while loading
     if (modalities.length === 1) return "AI Copilot";
     return null;
   })();
 
   return (
     <div className="flex flex-col items-center w-full">
+      {/* ── Responsive header styles (small screens only) ── */}
+      <style>{`
+        /* Hide the standalone status dot on small screens — the avatar badge takes over */
+        @media (max-width: 480px) {
+          .header-status-dot {
+            display: none !important;
+          }
+          /* Subtitle wraps to 2 lines, smaller font so both lines fit the header height */
+          .header-subtitle {
+            font-size: 10px !important;
+            white-space: normal !important;
+            line-height: 1.3 !important;
+            max-width: 72px;
+          }
+          /* Bot name stays prominent */
+          .header-botname {
+            font-size: 15px !important;
+            line-height: 1 !important;
+          }
+          /* Centre-align the name + divider + subtitle as a group */
+          .header-name-group {
+            align-items: center !important;
+            gap: 6px !important;
+          }
+          /* Hide "New chat" text, keep only the icon */
+          .new-chat-label {
+            display: none;
+          }
+        }
+      `}</style>
+
       <div
         style={{
           width: "100%",
@@ -201,30 +290,42 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
               borderBottom: "1px solid #ece9e4",
             }}
           >
-            {/* Avatar */}
-            <Image
-              src="/nova-icon.svg"
-              alt={botName}
-              width={36}
-              height={36}
-              style={{ borderRadius: "50%", display: "block", flexShrink: 0 }}
-            />
+            {/* Avatar — wraps in a relative container so the badge can be positioned */}
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              <Image
+                src="/nova-icon.svg"
+                alt={botName}
+                width={36}
+                height={36}
+                style={{ borderRadius: "50%", display: "block" }}
+              />
+              {/* Small-screen status badge overlaid on avatar */}
+              <AvatarStatusBadge
+                socketStatus={socketStatus}
+                sessionStatus={sessionStatus}
+              />
+            </div>
 
             <div
+              className="header-name-group"
               style={{
                 display: "flex",
                 alignItems: "baseline",
                 gap: 8,
+                minWidth: 0,
               }}
             >
               {/* Bot name */}
               <span
+                className="header-botname"
                 style={{
                   fontSize: 15,
                   fontWeight: 700,
                   color: "#1a1916",
                   letterSpacing: "-0.02em",
                   lineHeight: 1,
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
                 }}
               >
                 {botName}
@@ -238,16 +339,21 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
                       height: 16,
                       background: "#e5e1db",
                       alignSelf: "center",
+                      flexShrink: 0,
                     }}
                   />
 
                   <span
+                    className="header-subtitle"
                     style={{
                       fontSize: 13,
                       color: "#a09b94",
                       fontWeight: 500,
                       letterSpacing: "0.01em",
                       lineHeight: 1,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     Live Sales Assistant
@@ -258,10 +364,13 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
 
             <div style={{ flex: 1 }} />
 
-            <StatusDot
-              socketStatus={socketStatus}
-              sessionStatus={sessionStatus}
-            />
+            {/* Standalone status dot — hidden on small screens via CSS */}
+            <div className="header-status-dot">
+              <StatusDot
+                socketStatus={socketStatus}
+                sessionStatus={sessionStatus}
+              />
+            </div>
 
             {selectedModality && (
               <>
@@ -271,6 +380,7 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
                     height: 16,
                     background: "#e5e1db",
                     marginLeft: 6,
+                    flexShrink: 0,
                   }}
                 />
                 <NewChatButton onClick={resetSession} />

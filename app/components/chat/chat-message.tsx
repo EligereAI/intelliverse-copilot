@@ -83,10 +83,24 @@ function dedupeByLink(s: ChatMessageType["sources"]) {
 }
 
 // Markdown-rendering chat bubble
-function MarkdownBubble({ text, isStreaming, isProcessingMeta }: { text: string; isStreaming?: boolean; isProcessingMeta?: boolean }) {
+// `showCaret` is passed in explicitly so parent controls when it shows/hides
+function MarkdownBubble({
+  text,
+  isStreaming,
+  isProcessingMeta,
+  forceShowCaret,
+}: {
+  text: string;
+  isStreaming?: boolean;
+  isProcessingMeta?: boolean;
+  forceShowCaret?: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => { ensureMarked(() => { if (ref.current) ref.current.innerHTML = convertToHtml(text); }); });
-  const showCaret = isStreaming && !isProcessingMeta;
+
+  // Show caret while actively streaming OR while in the silent pre-banner window
+  const showCaret = (isStreaming && !isProcessingMeta) || forceShowCaret;
+
   return (
     <>
       <style>{`
@@ -187,20 +201,16 @@ function FeedbackRow({
   collectFeedback: boolean;
   requiredSupportButton: boolean;
 }) {
-  // If neither feature is enabled, render nothing
   if (!collectFeedback && !requiredSupportButton) return null;
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:7 }}>
-      {/* ── Thumbs row ── only when collectFeedback is true */}
       {collectFeedback && (
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          {/* Label — only before voting */}
           {vote === "idle" && (
             <span style={{ fontSize:13, color:"#6b6560" }}>Was this answer helpful?</span>
           )}
 
-          {/* Like button — always shown unless disliked */}
           {vote !== "disliked" && (
             <div className={vote === "liked" ? "vote-tooltip-wrap" : undefined}>
               {vote === "liked" && (
@@ -229,7 +239,6 @@ function FeedbackRow({
             </div>
           )}
 
-          {/* Dislike button — always shown unless liked */}
           {vote !== "liked" && (
             <div className={vote === "disliked" ? "vote-tooltip-wrap" : undefined}>
               {vote === "disliked" && (
@@ -260,7 +269,6 @@ function FeedbackRow({
         </div>
       )}
 
-      {/* ── Support ticket button ── only when requiredSupportButton is true AND before voting */}
       {requiredSupportButton && vote === "idle" && (
         <button onClick={onContactSupport} style={{
           background:"none", border:"none", cursor:"pointer",
@@ -313,9 +321,7 @@ interface Props {
   onFeedback?: (payload: FeedbackPayload) => void;
   onContactSupport?: () => void;
   onHeightChange?: () => void;
-  /** Gate the like/dislike thumbs — driven by company.collectFeedback */
   collectFeedback?: boolean;
-  /** Gate the "Create support ticket" button — driven by company.requiredSupportButton */
   requiredSupportButton?: boolean;
 }
 
@@ -330,24 +336,34 @@ export default function ChatMessage({
   const hasSources = !isUser && uniqueSources.length > 0;
   const bubbleRef = useRef<HTMLDivElement>(null);
 
-  // Processing banner — only after 5s of isProcessingMeta
+  // ── Processing / caret state ──────────────────────────────────────────────
   const [showProcessing, setShowProcessing] = useState(false);
+  const [forceShowCaret, setForceShowCaret] = useState(false);
   const procTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
-    if (message.isProcessingMeta && !procTimer.current) {
-      procTimer.current = setTimeout(() => setShowProcessing(true), 5000);
+    if (message.isProcessingMeta) {
+      // Immediately show the blinking caret while we wait for the banner
+      setForceShowCaret(true);
+
+      if (!procTimer.current) {
+        procTimer.current = setTimeout(() => {
+          // Hand off from caret → spinner banner after 5s
+          setForceShowCaret(false);
+          setShowProcessing(true);
+        }, 5000);
+      }
     }
+
     if (!message.isProcessingMeta) {
       if (procTimer.current) { clearTimeout(procTimer.current); procTimer.current = null; }
+      setForceShowCaret(false);
       setShowProcessing(false);
     }
   }, [message.isProcessingMeta]);
 
-  // Single source of truth for vote — lives here, never in a child
   const [vote, setVote] = useState<VoteState>("idle");
   const voted = vote !== "idle";
-
-  // ackLiked is set shortly after voting to trigger the ack bubble
   const [ackLiked, setAckLiked] = useState<boolean | null>(null);
 
   function handleVote(liked: boolean) {
@@ -362,17 +378,13 @@ export default function ChatMessage({
     }, 620);
   }
 
-  // suggestsDismissed controls slide-out of suggested questions only
   const [suggestsDismissed, setSuggestsDismissed] = useState(false);
   useEffect(() => { if (hasNewerMessage) setSuggestsDismissed(true); }, [hasNewerMessage]);
 
   const isDone = !isUser && !message.isStreaming && !message.isProcessingMeta;
   const rawPromptbacks = isDone ? (message.promptbackQuestions ?? []) : [];
-
-  // Decide whether the feedback row should be rendered at all
   const showFeedbackRow = collectFeedback || requiredSupportButton;
 
-  // Fire scroll when sources/promptbacks arrive (bubble grows taller)
   const prevHadSources = useRef(false);
   useEffect(() => {
     if (hasSources && !prevHadSources.current) {
@@ -381,7 +393,6 @@ export default function ChatMessage({
     }
   }, [hasSources, onHeightChange]);
 
-  // Fire scroll when isDone (streaming ends — bottom extras appear)
   const prevIsDone = useRef(false);
   useEffect(() => {
     if (isDone && !prevIsDone.current) {
@@ -390,7 +401,6 @@ export default function ChatMessage({
     }
   }, [isDone, onHeightChange]);
 
-  // Suppress avatar on main bubble when ack bubble is present
   const mainBubbleShowAvatar = showAvatar && ackLiked === null;
 
   function handlePromptbackClick(q: string) {
@@ -451,7 +461,12 @@ export default function ChatMessage({
               {isUser ? (
                 <span style={{ fontSize:14, lineHeight:1.6, whiteSpace:"pre-wrap", wordBreak:"break-word" }}>{message.text}</span>
               ) : (
-                <MarkdownBubble text={message.text} isStreaming={message.isStreaming} isProcessingMeta={message.isProcessingMeta} />
+                <MarkdownBubble
+                  text={message.text}
+                  isStreaming={message.isStreaming}
+                  isProcessingMeta={message.isProcessingMeta}
+                  forceShowCaret={forceShowCaret}
+                />
               )}
             </div>
 
@@ -490,7 +505,6 @@ export default function ChatMessage({
       {/* Below-bubble extras */}
       {isDone && (
         <>
-          {/* Feedback row: shown when at least one feature is enabled AND (voted OR not yet dismissed) */}
           {showFeedbackRow && (voted || !suggestsDismissed) && (
             <div
               className="extras-in"
@@ -509,7 +523,6 @@ export default function ChatMessage({
             </div>
           )}
 
-          {/* Suggested questions — their own dismissible block */}
           {rawPromptbacks.length > 0 && (
             <div
               className={suggestsDismissed ? "slide-out" : "extras-in"}
@@ -532,7 +545,6 @@ export default function ChatMessage({
             </div>
           )}
 
-          {/* Persistent ack bubble with avatar — never dismissed */}
           {ackLiked !== null && (
             <AckBubble liked={ackLiked} />
           )}
