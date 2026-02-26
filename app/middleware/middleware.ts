@@ -13,7 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ── API routes that require an active session ────────────────────────────
+  // API routes that require an active session
   if (pathname.startsWith("/api/transcribe")) {
     const sessionId = req.headers.get("x-session-id");
     if (!sessionId) {
@@ -24,7 +24,7 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // ── Pass everything else through ─────────────────────────────────────────
+  // Pass everything else through
   return NextResponse.next();
 }
 

@@ -176,13 +176,13 @@ export default function ModalityPicker() {
         gap: 0,
       }}>
 
-        {/* ── Greeting block ── */}
+        {/* Greeting block */}
         <div style={{
           textAlign: "center",
           maxWidth: 400,
           animation: "fadeUp 0.32s ease both",
         }}>
-          {/* Bot name — muted, small, above the headline */}
+          {/* Bot name — muted label above the headline */}
           <p style={{
             margin: "0 0 10px",
             fontSize: 11,
@@ -194,7 +194,7 @@ export default function ModalityPicker() {
             {botName}
           </p>
 
-          {/* Primary intro line — headline weight */}
+          {/* Primary intro line */}
           <h2 style={{
             margin: "0 0 10px",
             fontSize: 21,
@@ -221,7 +221,7 @@ export default function ModalityPicker() {
           ))}
         </div>
 
-        {/* ── Divider ── */}
+        {/* Divider */}
         <div style={{
           display: "flex",
           alignItems: "center",
@@ -245,7 +245,7 @@ export default function ModalityPicker() {
           <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, #ddd9d3, transparent)" }} />
         </div>
 
-        {/* ── Cards ── */}
+        {/* Modality cards */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center" }}>
           {modalities.map((m, i) => (
             <ModalityCard

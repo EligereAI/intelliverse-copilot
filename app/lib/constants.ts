@@ -1,6 +1,5 @@
-// ── These must match the backend exactly ────────────────────────────────────
-// WS URL uses a query-param userId, not a path segment
-// e.g.  wss://devsockets.elisa.live?userId=1234
+// Connection constants that must match the backend
+// WS URL uses a query-param userId, not a path segment (e.g. wss://devsockets.elisa.live?userId=1234)
 export const WS_BASE_URL =
   process.env.NEXT_PUBLIC_WS_URL ?? "wss://devsockets.elisa.live";
 

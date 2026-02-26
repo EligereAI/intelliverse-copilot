@@ -8,7 +8,7 @@ import ContactFormModal from "./contact-support-modal";
 import ModalityPicker from "./modality-picker";
 import { useChatContext } from "@/app/providers/chat-provider";
 
-// ── Typing indicator ──────────────────────────────────────────────────────────
+// Typing indicator bubble
 function TypingIndicator() {
   return (
     <>
@@ -33,7 +33,7 @@ function TypingIndicator() {
   );
 }
 
-// ── Welcome bubbles ───────────────────────────────────────────────────────────
+// Initial welcome message bubbles
 function WelcomeBubbles({ messages }: { messages: string[] }) {
   if (!messages.length) return null;
   return (
@@ -60,7 +60,7 @@ function WelcomeBubbles({ messages }: { messages: string[] }) {
   );
 }
 
-// ── Session gate screens ──────────────────────────────────────────────────────
+// Session error and expiration screens
 function SessionError({ error, onRetry }: { error: string | null; onRetry: () => void }) {
   return (
     <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:14, padding:"0 40px", textAlign:"center" }}>
@@ -80,7 +80,7 @@ function SessionExpired({ onReset }: { onReset: () => void }) {
   );
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
+// Main chat window component
 export default function ChatWindow() {
   const {
     messages, isWaiting, sendMessage, sendFeedback,
@@ -168,7 +168,7 @@ export default function ChatWindow() {
   return (
     <>
       <div style={{ display:"flex", flexDirection:"column", height:"100%" }}>
-        {/* ── Message list ── */}
+        {/* Message list */}
         <div
           ref={scrollRef}
           style={{
@@ -199,13 +199,13 @@ export default function ChatWindow() {
           <div ref={bottomRef} style={{ height:1 }} />
         </div>
 
-        {/* ── Input ── */}
+        {/* Chat input */}
         <div style={{ flexShrink:0, padding:"10px 14px 14px" }}>
           <ChatInput onSend={sendMessage} disabled={!canSend} />
         </div>
       </div>
 
-      {/* ── Contact form modal ── */}
+      {/* Contact form modal */}
       {showContact && (
         <ContactFormModal
           companyId={companyId}

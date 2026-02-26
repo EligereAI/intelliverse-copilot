@@ -144,8 +144,7 @@ export default function ChatFrame({ children }: { children: React.ReactNode }) {
 
   const botName = company?.css?.botName ?? "Nova";
 
-  // Single modality → "AI Sales Copilot" style label derived from the modality key
-  // Multi modality → show selected modality label or nothing until selected
+  // Derive subtitle from selected modality
   const subtitle = (() => {
     if (selectedModality) {
       if (modalities.length === 1) {

@@ -48,7 +48,7 @@ export function useSession({
   const optsRef = useRef({ flowType: defaultFlowType, languageCode });
   optsRef.current = { flowType: defaultFlowType, languageCode };
 
-  // Storage helpers 
+  // Storage helpers
   const sessionKey = `nova_session_${COMPANY_ID}_${defaultFlowType ?? "none"}`;
 
   const restore = useCallback(
@@ -91,7 +91,7 @@ export function useSession({
     [],
   );
 
-  // ── Core init — accepts an explicit flowType override ─────────────────────
+  // Core init — accepts an explicit flowType override
   const init = useCallback(
     async (flowType: string | null, forceNew = false) => {
       if (!forceNew) {

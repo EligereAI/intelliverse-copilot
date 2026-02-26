@@ -64,7 +64,7 @@ export function ChatProvider({
     autoStart: false,
   });
 
-  // ── ADDED: destructure sendFeedback from useChat ──
+  // Destructure sendFeedback from useChat so feedback can be passed down
   const { messages, socketStatus, isWaiting, sendMessage, sendFeedback, clearMessages } =
     useChat({
       sessionId,

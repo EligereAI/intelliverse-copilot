@@ -29,7 +29,7 @@ export default function Home() {
         flexDirection: "column",
         position: "relative",
         overflow: "hidden",
-        background: "#1a050b",   // ⭐ Balanced base
+        background: "#1a050b",   // Balanced base color
       }}
     >
       <style jsx global>{`
@@ -53,7 +53,7 @@ export default function Home() {
         }
       `}</style>
 
-      {/* ───────── RICH CRIMSON BASE GRADIENT ───────── */}
+      {/* Rich crimson base gradient background */}
 
       <div
         aria-hidden
@@ -70,7 +70,7 @@ export default function Home() {
         }}
       />
 
-      {/* ───────── FLOATING BLOBS 😈🔥 (BALANCED GLOW) ───────── */}
+      {/* Floating crimson glow blobs */}
 
       <div
         aria-hidden
@@ -79,7 +79,7 @@ export default function Home() {
           width: 680,
           height: 680,
           borderRadius: "50%",
-          background: "rgba(255, 40, 85, 0.45)",   // ⭐ Deep crimson glow
+          background: "rgba(255, 40, 85, 0.45)",   // Deep crimson glow
           filter: "blur(145px)",
           top: "-180px",
           left: "-200px",
@@ -96,7 +96,7 @@ export default function Home() {
           width: 600,
           height: 600,
           borderRadius: "50%",
-          background: "rgba(255, 90, 120, 0.32)",  // ⭐ Soft warm highlight
+          background: "rgba(255, 90, 120, 0.32)",  // Soft warm highlight
           filter: "blur(135px)",
           bottom: "-140px",
           right: "-150px",
@@ -113,7 +113,7 @@ export default function Home() {
           width: 520,
           height: 520,
           borderRadius: "50%",
-          background: "rgba(196, 16, 58, 0.38)",   // ⭐ Brand-rich red
+          background: "rgba(196, 16, 58, 0.38)",   // Brand-accent red glow
           filter: "blur(125px)",
           top: "35%",
           left: "60%",
@@ -123,7 +123,7 @@ export default function Home() {
         }}
       />
 
-      {/* ───────── CURSOR LIGHT ⭐⭐⭐⭐⭐ ───────── */}
+      {/* Cursor-following highlight */}
 
       <div
         aria-hidden
@@ -143,7 +143,7 @@ export default function Home() {
         }}
       />
 
-      {/* ───────── NOISE + VIGNETTE ───────── */}
+      {/* Noise texture and vignette overlay */}
 
       <div
         aria-hidden
@@ -171,7 +171,7 @@ export default function Home() {
         }}
       />
 
-      {/* ───────── NAV + MAIN ───────── */}
+      {/* Navigation bar and main content */}
 
       <nav
         style={{

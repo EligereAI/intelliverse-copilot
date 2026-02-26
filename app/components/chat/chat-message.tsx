@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ChatMessage as ChatMessageType, FeedbackPayload } from "../../hooks/useChat";
 
-// ─── Load marked ──────────────────────────────────────────────────────────────
+// Load marked.js from CDN on demand
 let markedLoaded = false;
 function ensureMarked(cb?: () => void) {
   if (typeof window === "undefined") return;
@@ -28,7 +28,7 @@ function ensureMarked(cb?: () => void) {
   document.head.appendChild(s);
 }
 
-// ─── URL helpers ──────────────────────────────────────────────────────────────
+// URL helper functions
 function removeTrailingPeriod(u: string) { return u.endsWith(".") ? u.slice(0, -1) : u; }
 function isImage(u: string) { return /\.(jpg|jpeg|png|gif|bmp|webp|svg)(\?.*)?$/i.test(u); }
 function isYTPlaylist(u: string) { return u.includes("youtube") && u.includes("list=") && !u.includes("v="); }
@@ -57,7 +57,7 @@ function convertToHtml(raw: string): string {
   return html;
 }
 
-// ─── Avatars ──────────────────────────────────────────────────────────────────
+// Avatar components
 function BotAvatar() {
   return (
     <div style={{ width:28, height:28, borderRadius:"50%", flexShrink:0, overflow:"hidden", boxShadow:"0 1px 3px rgba(0,0,0,0.12)" }}>
@@ -82,7 +82,7 @@ function dedupeByLink(s: ChatMessageType["sources"]) {
   return s.filter((x) => { if (seen.has(x.link)) return false; seen.add(x.link); return true; });
 }
 
-// ─── Markdown bubble ──────────────────────────────────────────────────────────
+// Markdown-rendering chat bubble
 function MarkdownBubble({ text, isStreaming, isProcessingMeta }: { text: string; isStreaming?: boolean; isProcessingMeta?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => { ensureMarked(() => { if (ref.current) ref.current.innerHTML = convertToHtml(text); }); });
@@ -119,7 +119,7 @@ function MarkdownBubble({ text, isStreaming, isProcessingMeta }: { text: string;
   );
 }
 
-// ─── Processing banner ────────────────────────────────────────────────────────
+// Banner shown while sources are being processed
 function ProcessingBanner() {
   return (
     <div style={{ display:"flex", alignItems:"center", gap:8, padding:"7px 11px", background:"#faf7f4", borderRadius:8, border:"1px solid #f0ebe4" }}>
@@ -132,7 +132,7 @@ function ProcessingBanner() {
   );
 }
 
-// ─── Copy button — hover-only via CSS class ───────────────────────────────────
+// Copy button — shown on hover via CSS
 function CopyButton({ getText }: { getText: () => string }) {
   const [copied, setCopied] = useState(false);
   async function handleCopy() {
@@ -171,7 +171,7 @@ function CopyButton({ getText }: { getText: () => string }) {
   );
 }
 
-// ─── Feedback row — fully controlled, vote state lives in parent ──────────────
+// Feedback row — controlled by parent via vote state
 type VoteState = "idle" | "liked" | "disliked";
 
 function FeedbackRow({
@@ -269,7 +269,7 @@ function FeedbackRow({
   );
 }
 
-// ─── Acknowledgement bot bubble ───────────────────────────────────────────────
+// Acknowledgement bubble after user feedback
 function AckBubble({ liked }: { liked: boolean }) {
   const text = liked
     ? "Glad I could help! Feel free to ask me anything else."
@@ -294,7 +294,7 @@ function AckBubble({ liked }: { liked: boolean }) {
   );
 }
 
-// ─── Main export ──────────────────────────────────────────────────────────────
+// Main ChatMessage component
 interface Props {
   message: ChatMessageType;
   showAvatar: boolean;
@@ -327,11 +327,11 @@ export default function ChatMessage({
     }
   }, [message.isProcessingMeta]);
 
-  // ── SINGLE source of truth for vote — lives here, never in a child ──
+  // Single source of truth for vote — lives here, never in a child
   const [vote, setVote] = useState<VoteState>("idle");
   const voted = vote !== "idle";
 
-  // ackLiked: set 600ms after voting — triggers ack bubble
+  // ackLiked is set shortly after voting to trigger the ack bubble
   const [ackLiked, setAckLiked] = useState<boolean | null>(null);
 
   function handleVote(liked: boolean) {
@@ -346,7 +346,7 @@ export default function ChatMessage({
     }, 620); // slightly after state settles
   }
 
-  // suggestsDismissed: slides away suggested questions only
+  // suggestsDismissed controls slide-out of suggested questions only
   const [suggestsDismissed, setSuggestsDismissed] = useState(false);
   useEffect(() => { if (hasNewerMessage) setSuggestsDismissed(true); }, [hasNewerMessage]);
 
@@ -372,7 +372,7 @@ export default function ChatMessage({
   }, [isDone, onHeightChange]);
 
   // Suppress avatar on main bubble when ack bubble is present
-  // (ack bubble is the visual "last" in the cluster and owns the avatar)
+  // (ack bubble is visually last in the cluster and owns the avatar)
   const mainBubbleShowAvatar = showAvatar && ackLiked === null;
 
   function handlePromptbackClick(q: string) {
@@ -412,7 +412,7 @@ export default function ChatMessage({
         .vote-tooltip-wrap:hover .vote-tooltip{opacity:1}
       `}</style>
 
-      {/* ── Main bubble row ── */}
+      {/* Main bubble row */}
       <div className="chat-bubble" style={{ display:"flex", flexDirection:isUser?"row-reverse":"row", alignItems:"flex-end", gap:8, padding:"2px 0" }}>
         {mainBubbleShowAvatar
           ? (isUser ? <UserAvatar /> : <BotAvatar />)
@@ -469,16 +469,14 @@ export default function ChatMessage({
         </div>
       </div>
 
-      {/* ── Below-bubble extras ──────────────────────────────────────────────────
-          Feedback row: ALWAYS its own persistent block.
-            - unvoted + dismissed → hidden (display:none, just gone)
-            - voted               → always visible
-          Suggestions: ALWAYS their own block — slide-out when dismissed
-          Ack bubble: ALWAYS persistent once shown
-      ──────────────────────────────────────────────────────────────────────────── */}
+      {/* Below-bubble extras:
+          - Feedback row is its own persistent block
+          - Suggestions are a separate block that can slide out
+          - Ack bubble is persistent once shown
+        */}
       {isDone && (
         <>
-          {/* ── Feedback row: visible when voted OR when not yet dismissed ── */}
+          {/* Feedback row: visible when voted OR when not yet dismissed */}
           {(voted || !suggestsDismissed) && (
             <div
               className="extras-in"
@@ -495,7 +493,7 @@ export default function ChatMessage({
             </div>
           )}
 
-          {/* ── Suggested questions — always their own dismissible block ── */}
+          {/* Suggested questions — their own dismissible block */}
           {rawPromptbacks.length > 0 && (
             <div
               className={suggestsDismissed ? "slide-out" : "extras-in"}
@@ -518,7 +516,7 @@ export default function ChatMessage({
             </div>
           )}
 
-          {/* ── PERSISTENT: ack bubble with avatar — never dismissed ── */}
+          {/* Persistent ack bubble with avatar — never dismissed */}
           {ackLiked !== null && (
             <AckBubble liked={ackLiked} />
           )}

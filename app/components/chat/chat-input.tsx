@@ -42,7 +42,7 @@ export default function ChatInput({ onSend, disabled = false }: ChatInputProps) 
     }
   };
 
-  // ── Send ───────────────────────────────────────────────────────────────────
+  // Send typed text message
   const handleSend = () => {
     const trimmed = textValue.trim();
     if (!trimmed || disabled || state === "processing") return;
@@ -51,7 +51,7 @@ export default function ChatInput({ onSend, disabled = false }: ChatInputProps) 
     setState("idle");
   };
 
-  // ── Recording ──────────────────────────────────────────────────────────────
+  // Voice recording and transcription
   const startRecording = async () => {
     if (disabled) return;
     setError(null);
@@ -113,7 +113,7 @@ export default function ChatInput({ onSend, disabled = false }: ChatInputProps) 
     setState("idle");
   };
 
-  // ── Dynamic styling ────────────────────────────────────────────────────────
+  // Dynamic styling based on current input state
   const shellShadow = (() => {
     const base = "0 1px 3px rgba(0,0,0,0.06), 0 3px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.88)";
     if (state === "recording") return "0 0 0 1.5px rgba(220,15,65,0.18), 0 3px 16px rgba(220,15,65,0.14), 0 8px 36px rgba(160,8,40,0.10), inset 0 1px 0 rgba(255,255,255,0.75)";
@@ -157,7 +157,7 @@ export default function ChatInput({ onSend, disabled = false }: ChatInputProps) 
 
       <div style={{ position: "relative", display: "flex", flexDirection: "row", height: SHELL_H, borderRadius: 16, border: `1.5px solid ${borderColor}`, background: "linear-gradient(to bottom, #ffffff 0%, #f4f1ee 55%, #eae7e3 100%)", boxShadow: shellShadow, transition: "box-shadow 0.45s ease, border-color 0.45s ease", overflow: "hidden" }}>
 
-        {/* ── Text area ── */}
+        {/* Text area */}
         <div style={{ flex: 1, position: "relative", minWidth: 0, overflow: "hidden" }}>
           <textarea
             rows={4}
@@ -202,10 +202,10 @@ export default function ChatInput({ onSend, disabled = false }: ChatInputProps) 
           )}
         </div>
 
-        {/* ── Divider ── */}
+        {/* Divider between text area and rail */}
         <div style={{ width: 1, margin: "14px 0", flexShrink: 0, background: dividerColor, transition: "background 0.45s ease" }} />
 
-        {/* ── Right rail ── */}
+        {/* Right control rail */}
         <div style={{ width: RAIL_W, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxSizing: "border-box" }}>
 
           {railMode === "idle" && (

@@ -142,7 +142,7 @@ export function useChat({
       const response = data.response as { text: string; passing: boolean } | undefined;
       if (!response) return;
 
-      // ── Stream finished ────────────────────────────────────────────────────
+      // Handle end of stream
       if (response.text === "stream-end") {
         const full = rawBufferRef.current;
         const endIdx = full.indexOf(END_TOKEN);
@@ -160,7 +160,7 @@ export function useChat({
         return;
       }
 
-      // ── Incoming chunk ─────────────────────────────────────────────────────
+      // Handle incoming streaming chunk
       if (response.passing && typeof response.text === "string") {
         rawBufferRef.current += response.text;
         const display = visibleText(rawBufferRef.current);

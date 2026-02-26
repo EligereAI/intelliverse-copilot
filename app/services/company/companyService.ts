@@ -1,6 +1,6 @@
 import type { Company, ResolvedModality, BotConfig, ModalityConfig } from "@/app/types/company";
 
-// ── Fetch from our Next.js API route ──────────────────────────────────────────
+// Fetch company config from our Next.js API route
 export async function fetchCompany(companyId: string): Promise<Company> {
   // Always trim — guards against env var whitespace/newline
   const id = companyId.trim();
@@ -20,7 +20,7 @@ export async function fetchCompany(companyId: string): Promise<Company> {
   return res.json() as Promise<Company>;
 }
 
-// ── Resolve label string from lang-keyed map or plain string ──────────────────
+// Resolve label string from language-keyed map or plain string
 function resolveLabel(
   label: string | Record<string, string> | undefined,
   lang: string,
@@ -31,7 +31,7 @@ function resolveLabel(
   return label[lang] ?? label["en"] ?? fallback;
 }
 
-// ── Mirror of server's defineModality — works on the raw MongoDB document ─────
+// Mirror of server's defineModality — works on the raw MongoDB document
 export function resolveModalities(
   company: Company,
   lang = "en",
@@ -80,7 +80,7 @@ export function resolveModalities(
   return [makeResolved("default", flatBot, { label: "Chat" })];
 }
 
-// ── Welcome messages for a resolved modality ──────────────────────────────────
+// Welcome messages for a resolved modality
 export function getWelcomeMessages(
   modality: ResolvedModality,
   lang = "en",
@@ -89,7 +89,7 @@ export function getWelcomeMessages(
   return msgs[lang] ?? msgs["en"] ?? [];
 }
 
-// ── Intro messages shown on the picker screen ─────────────────────────────────
+// Intro messages shown on the modality picker screen
 export function getIntroMessages(company: Company, lang = "en"): string[] {
   const intro = company.bot_intro_message;
   if (!intro) return [];
